@@ -147,11 +147,11 @@ first find the most spent on music for each country and second filter the data f
 
 /* using CTE */
 
-WITH Customter_with_country AS (
-		SELECT customer.customer_id,first_name,last_name,billing_country,SUM(total) AS total_spending,
+WITH Customer_with_country AS (
+		SELECT customer.customer_id,first_name||' '||last_name as customer_name,billing_country,SUM(total) AS total_spending,
 	    ROW_NUMBER() OVER(PARTITION BY billing_country ORDER BY SUM(total) DESC) AS RowNo 
 		FROM invoice
 		JOIN customer ON customer.customer_id = invoice.customer_id
-		GROUP BY 1,2,3,4
-		ORDER BY 4 ASC,5 DESC)
-SELECT * FROM Customter_with_country WHERE RowNo <= 1;
+		GROUP BY 1,2,3
+		ORDER BY 3 ASC)
+SELECT * FROM Customer_with_country WHERE RowNo <= 1;
