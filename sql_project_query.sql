@@ -63,7 +63,7 @@ WHERE track_id IN(
 	JOIN genre ON track.genre_id = genre.genre_id
 	WHERE genre.name LIKE 'Rock'
 )
-ORDER BY email;
+ORDER BY email ASC;
 
 
 /* Q2: Let's invite the artists who have written the most rock music in our dataset. 
@@ -83,12 +83,12 @@ LIMIT 10;
 /* Q3: Return all the track names that have a song length longer than the average song length. 
 Return the Name and Milliseconds for each track. Order by the song length with the longest songs listed first. */
 
-SELECT name,miliseconds
+SELECT name,milliseconds
 FROM track
-WHERE miliseconds > (
-	SELECT AVG(miliseconds) AS avg_track_length
+WHERE milliseconds > (
+	SELECT AVG(milliseconds) AS avg_track_length
 	FROM track )
-ORDER BY miliseconds DESC;
+ORDER BY milliseconds DESC;
 
 
 
@@ -103,25 +103,16 @@ Album, and Artist tables. Note, this one is tricky because the Total spent in th
 so you need to use the InvoiceLine table to find out how many of each product was purchased, and then multiply this by the price
 for each artist. */
 
-WITH best_selling_artist AS (
-	SELECT artist.artist_id AS artist_id, artist.name AS artist_name, SUM(invoice_line.unit_price*invoice_line.quantity) AS total_sales
-	FROM invoice_line
-	JOIN track ON track.track_id = invoice_line.track_id
-	JOIN album ON album.album_id = track.album_id
-	JOIN artist ON artist.artist_id = album.artist_id
-	GROUP BY 1
-	ORDER BY 3 DESC
-	LIMIT 1
-)
-SELECT c.customer_id, c.first_name, c.last_name, bsa.artist_name, SUM(il.unit_price*il.quantity) AS amount_spent
-FROM invoice i
-JOIN customer c ON c.customer_id = i.customer_id
-JOIN invoice_line il ON il.invoice_id = i.invoice_id
-JOIN track t ON t.track_id = il.track_id
-JOIN album alb ON alb.album_id = t.album_id
-JOIN best_selling_artist bsa ON bsa.artist_id = alb.artist_id
-GROUP BY 1,2,3,4
-ORDER BY 5 DESC;
+SELECT c.first_name||' '||c.last_name AS customer_name, a.name AS artist_name, 
+SUM(il.unit_price * il.quantity) AS total_spent
+FROM customer c
+JOIN invoice i ON c.customer_id = i.customer_id
+JOIN invoice_line il ON i.invoice_id = il.invoice_id
+JOIN track t ON il.track_id = t.track_id
+JOIN album al ON t.album_id = al.album_id
+JOIN artist a ON al.artist_id = a.artist_id
+GROUP BY customer_name, artist_name
+ORDER BY total_spent DESC;
 
 
 /* Q2: We want to find out the most popular music Genre for each country. We determine the most popular genre as the genre 
