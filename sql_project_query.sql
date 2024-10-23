@@ -133,7 +133,7 @@ WITH popular_genre AS
 	JOIN track ON track.track_id = invoice_line.track_id
 	JOIN genre ON genre.genre_id = track.genre_id
 	GROUP BY 2,3,4
-	ORDER BY 2 ASC, 1 DESC
+	ORDER BY 2 ASC
 )
 SELECT * FROM popular_genre WHERE RowNo <= 1;
 
